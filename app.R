@@ -1,51 +1,103 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    https://shiny.posit.co/
-#
-
 library(shiny)
+library(httr)
 
-# Define UI for application that draws a histogram
-ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
+ui <- navbarPage("TextminR",
+  tabPanel("All Documents",
     sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+        sidebarPanel("Wähle ein Topic aus: ",
+          div(
+            style = "overflow-y: scroll; max-height: 400px;",
+            uiOutput("topicsList")
+          )
         ),
-
-        # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("distPlot")
+           textOutput("selectedTopic")
         )
+    )
+  ),
+  tabPanel("Specific Document",
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("bins",
+                  "Number of bins:",
+                min = 1,
+                max = 50,
+                value = 30)
+        ),
+      mainPanel(
+          
+        )
+      )
     )
 )
 
-# Define server logic required to draw a histogram
 server <- function(input, output) {
+    topics <- reactiveVal()
+    dependencies <- reactiveVal()
+    
+    observe({
+      IP <- "172.20.10.4"
+      Pfad <- "/topiccount/lda"
+      url <- sprintf("http://%s:8000%s", IP, Pfad)
+      
+      res <- httr::GET(url)
+      
+      status <- httr::status_code(res)
+      
+      if (status == 200) {
+        num_topics <- as.numeric(httr::content(res, as = "text"))
+        if (!is.na(num_topics) && num_topics > 0) {
+          topics(data.frame(
+            TopicName = paste0("Topic ", 0:num_topics),
+            TopicNumber = 0:num_topics
+            ))
+        } else {
+          topics(NULL)
+        }
+      } else {
+        error_message <- paste("Fehler beim API-Aufruf! HTTP Status:", status)
+        topics(error_message)
+        print(error_message)
+      }
+    })
+    
+    output$topicsList <- renderUI({
+      req(topics())
+      lapply(1:nrow(topics()), function(i) {
+        topic_name <- topics()$TopicName[i]
+        topic_number <- topics()$TopicNumber[i]
+        actionLink(inputId = paste0("topic_", topic_number), label = topic_name, style = "display: block;")
+      })
+    })
+    
+    
+    observe({
+      req(topics())
+      lapply(1:nrow(topics()), function(i) {
+        topic_number <- topics()$TopicNumber[i]
+        observeEvent(input[[paste0("topic_", topic_number)]], {
+            IP <- "172.20.10.4"
+            url <- sprintf("http://%s:8000/topics/lda/%d", IP, topic_number)
+            
+            res <- httr::GET(url)
+            
+            if (httr::status_code(res) == 200) {
+              dependencies_data <- httr::content(res, as = "parsed")
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+              dependencies(dependencies_data)
 
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
+              output$selectedTopic <- renderText({
+                dep_string <- paste(names(dependencies()), collapse = ", ")
+                paste("Passenden Wörter zum ausgewählten Topic: ", dep_string)
+              })
+            } else {
+              output$selectedTopic <- renderText({
+                paste("Error: Failed to load dependencies for topic number:", topic_number)
+              })
+            }
+        })
+      })
     })
 }
 
-# Run the application 
 shinyApp(ui = ui, server = server)
