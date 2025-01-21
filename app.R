@@ -1,5 +1,6 @@
 library(shiny)
 library(httr)
+library(ggplot2)
 
 ui <- navbarPage("TextminR",
   tabPanel("All Documents",
@@ -11,7 +12,7 @@ ui <- navbarPage("TextminR",
           )
         ),
         mainPanel(
-           textOutput("selectedTopic")
+           plotOutput("selectedTopic")
         )
     )
   ),
@@ -83,12 +84,24 @@ server <- function(input, output) {
             
             if (httr::status_code(res) == 200) {
               dependencies_data <- httr::content(res, as = "parsed")
+              
+              dependencies_df <- data.frame(
+                name = names(dependencies_data),
+                wert = unlist(dependencies_data, use.names = FALSE),
+                stringsAsFactors = FALSE
+              )
 
-              dependencies(dependencies_data)
+              dependencies(dependencies_df)
 
-              output$selectedTopic <- renderText({
-                dep_string <- paste(names(dependencies()), collapse = ", ")
-                paste("Passenden Wörter zum ausgewählten Topic: ", dep_string)
+              output$selectedTopic <- renderPlot({
+                ggplot(dependencies_df, aes(x=wert, y=reorder(name, wert))) +
+                  geom_bar(stat = "identity") +
+                  labs(
+                    title = "Topic Modelling",
+                    x = "Häufigkeiten",
+                    y = "Wörter"
+                  ) +
+                  theme_minimal()
               })
             } else {
               output$selectedTopic <- renderText({
