@@ -94,14 +94,23 @@ server <- function(input, output) {
               dependencies(dependencies_df)
 
               output$selectedTopic <- renderPlot({
-                ggplot(dependencies_df, aes(x=wert, y=reorder(name, wert))) +
-                  geom_bar(stat = "identity") +
+                ggplot(dependencies_df, aes(x = wert, y = reorder(name, wert), fill = wert)) +
+                  geom_bar(stat = "identity", color = "black") +
+                  scale_fill_gradient(low = "#03a1fc", high = "#1803fc") +
                   labs(
-                    title = "Topic Modelling",
+                    title = "Topic Modelling: Häufigkeiten der Wörter",
                     x = "Häufigkeiten",
                     y = "Wörter"
                   ) +
-                  theme_minimal()
+                  theme_minimal(base_size = 14) +
+                  theme(
+                    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+                    axis.title.x = element_text(margin = margin(t = 10)),
+                    axis.title.y = element_text(margin = margin(r = 10)),
+                    axis.text.y = element_text(size = 12),
+                    axis.text.x = element_text(size = 12),
+                    legend.position = "none"
+                  )
               })
             } else {
               output$selectedTopic <- renderText({
