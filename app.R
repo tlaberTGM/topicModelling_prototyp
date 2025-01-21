@@ -98,9 +98,9 @@ server <- function(input, output) {
                   geom_bar(stat = "identity", color = "black") +
                   scale_fill_gradient(low = "#03a1fc", high = "#1803fc") +
                   labs(
-                    title = "Topic Modelling: Häufigkeiten der Wörter",
-                    x = "Häufigkeiten",
-                    y = "Wörter"
+                    title = sprintf("Topic %d: Relevanz der Wörter", topic_number),
+                    x = "",
+                    y = ""
                   ) +
                   theme_minimal(base_size = 14) +
                   theme(
