@@ -2,6 +2,8 @@ library(shiny)
 library(httr)
 library(ggplot2)
 
+IP <- "localhost"
+
 ui <- navbarPage("TextminR",
   tabPanel("All Documents",
     sidebarLayout(
@@ -37,7 +39,7 @@ server <- function(input, output) {
     dependencies <- reactiveVal()
     
     observe({
-      IP <- "172.20.10.4"
+      IP <- IP
       Pfad <- "/topiccount/lda"
       url <- sprintf("http://%s:8000%s", IP, Pfad)
       
@@ -77,7 +79,7 @@ server <- function(input, output) {
       lapply(1:nrow(topics()), function(i) {
         topic_number <- topics()$TopicNumber[i]
         observeEvent(input[[paste0("topic_", topic_number)]], {
-            IP <- "172.20.10.4"
+            IP <- IP
             url <- sprintf("http://%s:8000/topics/lda/%d", IP, topic_number)
             
             res <- httr::GET(url)
