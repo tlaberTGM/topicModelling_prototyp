@@ -1,0 +1,40 @@
+body {
+  color: #000000 !important; /* Standard-Textfarbe */
+}
+
+.navbar {
+  background-color: #ffffff!important; /* Hintergrundfarbe der Navbar */
+}
+
+.navbar .navbar-brand, 
+.navbar .nav-link {
+  color: #000000 !important; /* Textfarbe der Navbar */
+}
+
+.tab-content {
+  color: #333333 !important; /* Textfarbe innerhalb der Tab-Panels */
+  background-color: #f9f9f9 !important; /* Hintergrundfarbe der Tab-Panels */
+  padding: 15px; /* Abstand innerhalb der Tabs */
+  border: 1px solid #ddd; /* Optional: Rahmen um die Tab-Inhalte */
+  border-radius: 5px; /* Abgerundete Ecken */
+}
+
+.nav-tabs .nav-link {
+  color: #000000 !important; /* Textfarbe der Tab-Titel */
+  background-color: #ffffff !important; /* Hintergrundfarbe der Tabs */
+  border: 1px solid #ddd !important; /* Rahmen um die Tabs */
+  border-radius: 5px 5px 0 0 !important; /* Abgerundete Ecken oben */
+}
+
+/* Aktiver Tab */
+.nav-tabs .nav-link.active {
+  color: #ffffff !important; /* Textfarbe für aktiven Tab */
+  background-color: #007bff !important; /* Hintergrundfarbe des aktiven Tabs */
+  border-color: #007bff !important; /* Rahmenfarbe des aktiven Tabs */
+}
+
+.custom_sidebar {
+  font-weight: bold;
+  font-size: 20px;
+  padding-bottom: 5px;
+}

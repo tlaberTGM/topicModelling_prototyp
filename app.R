@@ -7,9 +7,16 @@ library(dplyr)
 IP <- "localhost"
 
 ui <- navbarPage("TextminR",
+  tags$head(
+    tags$link(rel = "stylesheet", type="text/css", href="style.css"),
+  ),
   tabPanel("All Documents",
     sidebarLayout(
-        sidebarPanel("Wähle ein Topic aus: ",
+        sidebarPanel(
+          div(
+            class="custom_sidebar",
+            "Wähle ein Topic aus: "
+          ),
           div(
             style = "overflow-y: scroll; max-height: 400px;",
             uiOutput("topicsList")
@@ -23,8 +30,10 @@ ui <- navbarPage("TextminR",
   tabPanel("Specific Document",
     sidebarLayout(
       sidebarPanel(
-        textInput("such_string", "Suchfeld"),
-        helpText("Eine Suchfunktion um spezielle Werke zu filtern"),
+        div(
+          class="custom_sidebar",
+          textInput("such_string", "Suchfeld", placeholder = "Suchen Sie ein Werk")
+        ),
         div(
           style = "overflow-y: scroll; max-height: 400px;",
           uiOutput("documents_list"),
@@ -33,7 +42,10 @@ ui <- navbarPage("TextminR",
             actionButton(
               inputId = "plot_button",
               label = "Topics anzeigen",
-              style = "width: 100%;"
+              style = "margin-bottom: 10px;
+              padding: 5px 15px; background-color: #007BFF; color: white;
+              border: none; border-radius: 5px; cursor: pointer; display: block;
+              width: 100%; font-size: 14px;"
             )
           )
         )
@@ -80,7 +92,11 @@ server <- function(input, output, session) {
       lapply(1:nrow(topics()), function(i) {
         topic_name <- topics()$TopicName[i]
         topic_number <- topics()$TopicNumber[i]
-        actionLink(inputId = paste0("topic_", topic_number), label = topic_name, style = "display: block;")
+        actionButton(
+          inputId = paste0("topic_", topic_number),
+          label = topic_name,
+          style = "margin-bottom: 10px; padding: 5px 15px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer; display: block; width: 100%; font-size: 14px;"
+        )
       })
     })
     
@@ -163,7 +179,6 @@ server <- function(input, output, session) {
     
     filtered_documents <- reactive({
       req(df())
-      print(df())
       if (!"titel" %in% colnames(df())) {
         stop("Die Spalte 'titel' wurde nicht gefunden.")
       }
@@ -189,7 +204,13 @@ server <- function(input, output, session) {
             actionLink(
               inputId = paste0("document_", document_id), 
               label = documents_name, 
-              style = "display: block;")
+              style = "display: block; 
+              margin-left: -38px;
+              font-size: 16px;
+              color: #000000;
+              border-bottom: 1px solid #000000;
+              margin-bottom: 10px;
+              transition: color 0.3s ease;")
           })
         )
       }
@@ -237,7 +258,7 @@ server <- function(input, output, session) {
     observeEvent(input$plot_button, {
       showModal(
         modalDialog(
-          title = "Beispiel-Plot",
+          title = "Topics",
           plotOutput("modal_plot"),
           size = "l",
           easyClose = TRUE,
